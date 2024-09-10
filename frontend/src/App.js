@@ -5,8 +5,9 @@ function App() {
     const [note, setNote] = useState('');
     const [notes, setNotes] = useState([]);
     const [showNotes, setShowNotes] = useState(false);
-    const [loading, setLoading] = useState({ save: false, fetch: false, delete: false });
-    const [error, setError] = useState(''); // Added error state
+    const [loading, setLoading] = useState({ save: false, fetch: false });
+    const [deletingNoteId, setDeletingNoteId] = useState(null); // Track note being deleted
+    const [error, setError] = useState('');
 
     useEffect(() => {
         if (showNotes) {
@@ -32,7 +33,7 @@ function App() {
             return;
         }
 
-        setError(''); // Clear error if input is valid
+        setError('');
         setLoading(prev => ({ ...prev, save: true }));
         try {
             await axios.post('https://notes-app-ypdp.onrender.com/api/notes', { content: note });
@@ -48,7 +49,7 @@ function App() {
     };
 
     const deleteNote = async (id) => {
-        setLoading(prev => ({ ...prev, delete: true }));
+        setDeletingNoteId(id); // Set the note ID being deleted
         try {
             await axios.delete(`https://notes-app-ypdp.onrender.com/api/notes/${id}`);
             if (showNotes) {
@@ -57,7 +58,7 @@ function App() {
         } catch (error) {
             console.error('Error deleting note:', error);
         } finally {
-            setLoading(prev => ({ ...prev, delete: false }));
+            setDeletingNoteId(null); // Clear the note ID after deletion
         }
     };
 
@@ -144,18 +145,18 @@ function App() {
                             {note.content}
                             <button
                                 onClick={() => deleteNote(note._id)}
-                                disabled={loading.delete}
+                                disabled={deletingNoteId === note._id}
                                 style={{
                                     padding: '5px 10px',
                                     backgroundColor: '#f44336',
                                     color: 'white',
                                     border: 'none',
                                     borderRadius: '5px',
-                                    cursor: loading.delete ? 'not-allowed' : 'pointer',
+                                    cursor: deletingNoteId === note._id ? 'not-allowed' : 'pointer',
                                     boxShadow: '2px 2px 5px rgba(0, 0, 0, 0.1)',
                                 }}
                             >
-                                {loading.delete ? 'Deleting...' : 'Delete'}
+                                {deletingNoteId === note._id ? 'Deleting...' : 'Delete'}
                             </button>
                         </li>
                     ))}
