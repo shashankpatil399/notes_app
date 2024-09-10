@@ -14,7 +14,7 @@ function App() {
 
     const fetchNotes = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/notes');
+            const response = await axios.get('https://notes-app-ypdp.onrender.com/api/notes');
             setNotes(response.data);
         } catch (error) {
             console.error('Error fetching notes:', error);
@@ -23,7 +23,7 @@ function App() {
 
     const saveNote = async () => {
         try {
-            await axios.post('http://localhost:5000/api/notes', { content: note });
+            await axios.post('https://notes-app-ypdp.onrender.com/api/notes', { content: note });
             setNote('');
             if (showNotes) {
                 fetchNotes();
@@ -35,7 +35,7 @@ function App() {
 
     const deleteNote = async (id) => {
         try {
-            await axios.delete(`http://localhost:5000/api/notes/${id}`);
+            await axios.delete(`https://notes-app-ypdp.onrender.com/api/notes/${id}`);
             if (showNotes) {
                 fetchNotes();
             }
