@@ -5,6 +5,7 @@ function App() {
     const [note, setNote] = useState('');
     const [notes, setNotes] = useState([]);
     const [showNotes, setShowNotes] = useState(false);
+    const [loading, setLoading] = useState({ save: false, fetch: false, delete: false });
 
     useEffect(() => {
         if (showNotes) {
@@ -13,34 +14,43 @@ function App() {
     }, [showNotes]);
 
     const fetchNotes = async () => {
+        setLoading(prev => ({ ...prev, fetch: true }));
         try {
-            const response = await axios.get('https://notes-app-ypdp.onrender.com/api/notes');
+            const response = await axios.get('http://localhost:5000/api/notes');
             setNotes(response.data);
         } catch (error) {
             console.error('Error fetching notes:', error);
+        } finally {
+            setLoading(prev => ({ ...prev, fetch: false }));
         }
     };
 
     const saveNote = async () => {
+        setLoading(prev => ({ ...prev, save: true }));
         try {
-            await axios.post('https://notes-app-ypdp.onrender.com/api/notes', { content: note });
+            await axios.post('http://localhost:5000/api/notes', { content: note });
             setNote('');
             if (showNotes) {
                 fetchNotes();
             }
         } catch (error) {
             console.error('Error saving note:', error);
+        } finally {
+            setLoading(prev => ({ ...prev, save: false }));
         }
     };
 
     const deleteNote = async (id) => {
+        setLoading(prev => ({ ...prev, delete: true }));
         try {
-            await axios.delete(`https://notes-app-ypdp.onrender.com/api/notes/${id}`);
+            await axios.delete(`http://localhost:5000/api/notes/${id}`);
             if (showNotes) {
                 fetchNotes();
             }
         } catch (error) {
             console.error('Error deleting note:', error);
+        } finally {
+            setLoading(prev => ({ ...prev, delete: false }));
         }
     };
 
@@ -75,6 +85,7 @@ function App() {
             <div style={{ marginBottom: '20px' }}>
                 <button
                     onClick={saveNote}
+                    disabled={loading.save}
                     style={{
                         padding: '10px 20px',
                         marginRight: '10px',
@@ -82,25 +93,26 @@ function App() {
                         color: 'white',
                         border: 'none',
                         borderRadius: '5px',
-                        cursor: 'pointer',
+                        cursor: loading.save ? 'not-allowed' : 'pointer',
                         boxShadow: '2px 2px 5px rgba(0, 0, 0, 0.1)',
                     }}
                 >
-                    Save Note
+                    {loading.save ? 'Saving...' : 'Save Note'}
                 </button>
                 <button
                     onClick={toggleNotes}
+                    disabled={loading.fetch}
                     style={{
                         padding: '10px 20px',
                         backgroundColor: '#008CBA',
                         color: 'white',
                         border: 'none',
                         borderRadius: '5px',
-                        cursor: 'pointer',
+                        cursor: loading.fetch ? 'not-allowed' : 'pointer',
                         boxShadow: '2px 2px 5px rgba(0, 0, 0, 0.1)',
                     }}
                 >
-                    {showNotes ? 'Hide Notes' : 'List Notes'}
+                    {loading.fetch ? 'Loading...' : showNotes ? 'Hide Notes' : 'List Notes'}
                 </button>
             </div>
             {showNotes && (
@@ -122,17 +134,18 @@ function App() {
                             {note.content}
                             <button
                                 onClick={() => deleteNote(note._id)}
+                                disabled={loading.delete}
                                 style={{
                                     padding: '5px 10px',
                                     backgroundColor: '#f44336',
                                     color: 'white',
                                     border: 'none',
                                     borderRadius: '5px',
-                                    cursor: 'pointer',
+                                    cursor: loading.delete ? 'not-allowed' : 'pointer',
                                     boxShadow: '2px 2px 5px rgba(0, 0, 0, 0.1)',
                                 }}
                             >
-                                Delete
+                                {loading.delete ? 'Deleting...' : 'Delete'}
                             </button>
                         </li>
                     ))}
