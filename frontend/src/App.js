@@ -6,6 +6,7 @@ function App() {
     const [notes, setNotes] = useState([]);
     const [showNotes, setShowNotes] = useState(false);
     const [loading, setLoading] = useState({ save: false, fetch: false, delete: false });
+    const [error, setError] = useState(''); // Added error state
 
     useEffect(() => {
         if (showNotes) {
@@ -27,10 +28,11 @@ function App() {
 
     const saveNote = async () => {
         if (note.trim() === '') {
-            alert('Note cannot be empty');
+            setError('Note cannot be empty');
             return;
         }
 
+        setError(''); // Clear error if input is valid
         setLoading(prev => ({ ...prev, save: true }));
         try {
             await axios.post('https://notes-app-ypdp.onrender.com/api/notes', { content: note });
@@ -80,13 +82,16 @@ function App() {
                 placeholder="Enter your note here..."
                 style={{
                     padding: '10px',
-                    marginBottom: '10px',
+                    marginBottom: '5px',
                     width: '300px',
                     borderRadius: '5px',
                     border: '1px solid #ccc',
                     boxShadow: '2px 2px 5px rgba(0, 0, 0, 0.1)',
                 }}
             />
+            {error && (
+                <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>
+            )}
             <div style={{ marginBottom: '20px' }}>
                 <button
                     onClick={saveNote}
