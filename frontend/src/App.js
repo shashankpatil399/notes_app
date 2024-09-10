@@ -26,6 +26,11 @@ function App() {
     };
 
     const saveNote = async () => {
+        if (note.trim() === '') {
+            alert('Note cannot be empty');
+            return;
+        }
+
         setLoading(prev => ({ ...prev, save: true }));
         try {
             await axios.post('https://notes-app-ypdp.onrender.com/api/notes', { content: note });
